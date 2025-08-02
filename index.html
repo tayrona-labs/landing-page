@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tayrona Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --header-height: 60px;
+      --dark-bg: #0a0e14;
+      --dark-panel: rgba(10,14,20,0.85);
+      --accent: #e67e22;
+      --light-text: #fefefe;
+      --subtle-text: #aab2bd;
+      --transition: 0.3s ease;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; }
+    body { font-family:'Poppins',sans-serif; background:var(--dark-bg); color:var(--light-text); overflow-x:hidden; }
+    a { text-decoration:none; color:inherit; }
+
+    /* HEADER */
+    header { position:fixed; top:0; left:0; width:100%; height:var(--header-height); background:var(--dark-panel); display:flex; align-items:center; z-index:100; }
+    .nav-container { width:100%; max-width:1200px; margin:0 auto; padding:0 1rem; display:flex; align-items:center; justify-content:space-between; }
+    .logo { font-size:1.25rem; font-weight:700; }
+    .menu-toggle { display:none; background:none; border:none; color:var(--light-text); font-size:1.5rem; cursor:pointer; }
+    nav ul { display:flex; gap:1rem; list-style:none; margin-left:auto; }
+    nav.open ul { display:flex; flex-direction:column; background:var(--dark-panel); position:absolute; top:var(--header-height); left:0; width:100%; padding:1rem 0; }
+    nav a { position:relative; padding:0.5rem 1rem; border-radius:999px; background:rgba(255,255,255,0.1); transition:background var(--transition); font-weight:600; }
+    nav a:hover, nav a.active { background:var(--accent); color:var(--dark-bg); }
+    nav a::after { content:""; position:absolute; left:0; bottom:-4px; width:100%; height:2px; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform 0.3s ease; }
+    nav a.active::after { transform:scaleX(1); }
+    @media(max-width:768px){ .menu-toggle{display:block;} nav ul{display:none;} }
+
+    /* HERO & CAROUSEL */
+    .hero-panel { margin-top:var(--header-height); height:calc(100vh - var(--header-height)); position:relative; overflow:hidden; }
+    #bg-canvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+    .slides{display:flex; height:100%; transition:transform 0.5s ease-in-out; z-index:1; }
+    .slide{flex:0 0 100vw; display:flex; align-items:center; justify-content:center; padding:2rem; position:relative; }
+    .hero-content{text-align:center;}
+    .hero-content h1{font-size:2.5rem;margin-bottom:1rem;}
+    .hero-content p{font-size:1.1rem;color:var(--subtle-text);margin-bottom:1.5rem;}
+    .cta-buttons{display:flex;gap:1rem;justify-content:center;}
+    .btn{padding:0.75rem 2rem;border:none;border-radius:999px;font-weight:600;cursor:pointer;transition:transform var(--transition);} 
+    .btn-primary{background:var(--accent);color:var(--dark-bg);} 
+    .btn-secondary{background:rgba(255,255,255,0.1);color:var(--light-text);} 
+    .btn:hover{transform:translateY(-2px);} 
+    .carousel-control{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.3);color:#fff;border:none;padding:0.5rem;border-radius:50%;cursor:pointer;z-index:2;} 
+    .prev{left:1rem;} .next{right:1rem;} 
+    .scroll-down{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.1);border:none;border-radius:50%;padding:0.75rem;font-size:1.5rem;color:var(--light-text);cursor:pointer;backdrop-filter:blur(10px);transition:transform var(--transition);z-index:2;} 
+    .scroll-down:hover{transform:translateX(-50%) translateY(5px);} 
+
+    /* CHAT */
+    .chat{position:relative;max-width:400px;width:100%;background:var(--dark-panel);border-radius:1rem;padding:1rem;display:flex;flex-direction:column;gap:1rem;overflow:hidden;z-index:3;}
+    .chat::before,.chat::after{content:'';position:absolute;left:0;width:100%;height:15%;pointer-events:none;z-index:4;} 
+    .chat::before{top:0;background:linear-gradient(to bottom,var(--dark-panel),transparent);} 
+    .chat::after{bottom:0;background:linear-gradient(to top,var(--dark-panel),transparent);} 
+    .message{opacity:0;transform:translateY(10px);transition:opacity 0.4s,transform 0.4s;padding:0.75rem;border-radius:1rem;background:rgba(255,255,255,0.1);position:relative;z-index:5;} 
+    .message.visible{opacity:1;transform:translateY(0);} 
+    .user{align-self:flex-end;background:rgba(255,255,255,0.2);} 
+    .agent{align-self:flex-start;} 
+    .meta{font-size:0.75rem;color:var(--subtle-text);margin-bottom:0.5rem;display:flex;justify-content:space-between;} 
+
+    /* SECTIONS */
+    section{padding:4rem 1rem;opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease;} 
+    section.show{opacity:1;transform:translateY(0);} 
+    .highlight{animation:pulse 0.8s ease-out;} 
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(230,126,34,0.7);}70%{box-shadow:0 0 0 10px rgba(230,126,34,0);}100%{box-shadow:0 0 0 0 rgba(230,126,34,0);}} 
+    .section-title{text-align:center;font-size:2rem;margin-bottom:2rem;} 
+    .cards{display:grid;gap:2rem;max-width:1200px;margin:auto;} 
+    #features .cards{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));} 
+    #usecases .cards{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));} 
+    .card{background:var(--dark-panel);border-radius:1rem;padding:2rem;text-align:center;} 
+    /* CONTACT */
+    #contact{background:var(--dark-panel);padding:2rem;border-radius:1rem;max-width:600px;margin:auto;} 
+    #contact form{display:flex;flex-direction:column;gap:1rem;} 
+    #contact input,#contact textarea{padding:1rem;border:none;border-radius:0.5rem;background:#1a1f27;color:var(--light-text);} 
+    #contact button{padding:1rem 2rem;border:none;border-radius:999px;background:var(--accent);color:var(--dark-bg);cursor:pointer;font-weight:600;} 
+    footer{text-align:center;padding:2rem 1rem;color:var(--subtle-text);} 
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-container">
+      <div class="logo">Tayrona Labs</div>
+      <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+      <nav>
+        <ul id="nav-list">
+          <li><a href="#features" class="nav-link">Servicios</a></li>
+          <li><a href="#usecases" class="nav-link">Quiénes se benefician</a></li>
+          <li><a href="#contact" class="nav-link">Contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero-panel">
+    <canvas id="bg-canvas"></canvas>
+    <div class="slides" id="slides">
+      <div class="slide">
+        <div class="hero-content">
+          <h1>Potencia tu empresa con agentes IA</h1>
+          <p>Transformamos procesos rutinarios en experiencias inteligentes y eficientes, diseñadas a tu medida.</p>
+          <div class="cta-buttons">
+            <button class="btn btn-primary">Agenda tu Demo</button>
+            <button class="btn btn-secondary">Descubre Más</button>
+          </div>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="chat" id="chat">
+          <div class="message user visible" id="msg0"><div class="meta"><span>Cliente</span><span>10:00 AM</span></div>Mi servicio de internet está dañado.</div>
+          <div class="message agent" id="msg1"><div class="meta"><span>Agente</span><span>10:01 AM</span></div></div>
+          <div class="message user" id="msg2"><div class="meta"><span>Cliente</span><span>10:02 AM</span></div></div>
+          <div class="message agent" id="msg3"><div class="meta"><span>Agente</span><span>10:03 AM</span></div></div>
+          <div class="message agent" id="msg4"><div class="meta"><span>Agente</span><span>10:04 AM</span></div></div>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control prev" aria-label="Anterior slide">❮</button>
+    <button class="carousel-control next" aria-label="Siguiente slide">❯</button>
+    <button class="scroll-down" onclick="scrollToSection('features')">⭣</button>
+  </div>
+
+  <section id="features"><div class="section-title">Nuestros Servicios</div><div class="cards"><div class="card"><h3>Optimización Inteligente</h3><p>Automatiza tareas repetitivas y minimiza errores operativos.</p></div><div class="card"><h3>Agentes Adaptativos</h3><p>Soluciones que aprenden y mejoran con cada interacción.</p></div><div class="card"><h3>Implementación Rápida</h3><p>Despliegue ágil que acelera tu retorno de inversión.</p></div></div></section>
+  <section id="usecases"><div class="section-title">Quiénes se benefician</div><div class="cards"><div class="card"><h4>🚚 Logística</h4><p>Optimización de rutas y entregas.</p></div><div class="card"><h4>💬 Soporte</h4><p>Atención al cliente 24/7.</p></div><div class="card"><h4>📦 Inventarios</h4><p>Control automático de existencias y reabastecimiento.</p></div><div class="card"><h4>📊 Reportes</h4><p>Análisis en tiempo real.</p></div></div></section>
+  <section id="contact"><div class="section-title">Contáctanos</div><form action="mailto:tayronalabs@gmail.com" method="POST" enctype="text/plain"><input type="text" name="name" placeholder="Tu nombre" required /><input type="email" name="email" placeholder="Tu correo electrónico" required /><textarea name="message" rows="4" placeholder="¿En qué podemos ayudarte?" required></textarea><button type="submit">Enviar Mensaje</button></form></section>
+
+  <footer>&copy; 2025 Tayrona Labs. Innovación en cada agente.</footer>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // MENU TOGGLE
+    const menuToggle=document.querySelector('.menu-toggle');
+    const nav=document.querySelector('nav');
+    menuToggle.addEventListener('click',()=>nav.classList.toggle('open'));
+
+    // NAV LINK ANIMATION + SMOOTH SCROLL
+    document.querySelectorAll('.nav-link').forEach(link=>{
+      link.addEventListener('click',e=>{
+        e.preventDefault();
+        nav.classList.remove('open');
+        document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+        link.classList.add('active');
+        const id=link.getAttribute('href').substring(1);
+        const target=document.getElementById(id);
+        target.scrollIntoView({behavior:'smooth'});
+        target.classList.add('highlight');
+        setTimeout(()=>target.classList.remove('highlight'),800);
+      });
+    });
+
+    // SECTION REVEAL ON SCROLL
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('show'); observer.unobserve(entry.target); } });
+    },{threshold:0.2});
+    document.querySelectorAll('section').forEach(sec=>observer.observe(sec));
+
+    // CAROUSEL
+    const slides=document.getElementById('slides');
+    let current=0; const total=slides.children.length;
+    document.querySelector('.prev').addEventListener('click',()=>showSlide(current-1));
+    document.querySelector('.next').addEventListener('click',()=>showSlide(current+1));
+    function showSlide(index){ current=(index+total)%total; slides.style.transform=`translateX(-${current*100}vw)`; if(current===1) animateChat(); }
+    showSlide(0);
+
+    // CHAT SEQUENCE
+    function animateChat(){ const seq=[{id:'msg1',text:'He revisado tu conexión y parece cortada físicamente. Agendo visita, ¿qué día y a qué hora?'},{id:'msg2',text:'Martes 10am.'},{id:'msg3',text:'Cita agendada: técnico Juan Pérez.'},{id:'msg4',text:'Radicado #75331.'}]; seq.forEach((m,i)=>setTimeout(()=>{const el=document.getElementById(m.id);const meta=el.querySelector('.meta');el.innerHTML='';if(meta)el.appendChild(meta);el.appendChild(document.createTextNode(m.text));el.classList.add('visible');},(i+1)*1500)); }
+
+    // SCROLL DOWN BTN
+    window.scrollToSection=id=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+
+    // PARTICLES BACKGROUND
+    const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');let parts=[];
+    function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+    window.addEventListener('resize',resize); resize();
+    class P{constructor(){this.x=Math.random()*canvas.width;this.y=Math.random()*canvas.height;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.r=Math.random()*2+1;} move(){this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>canvas.width) this.vx*=-1; if(this.y<0||this.y>canvas.height) this.vy*=-1;} draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,2*Math.PI);ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fill();}}
+    function initParts(){parts=[];for(let i=0;i<150;i++)parts.push(new P());}
+    function link(){parts.forEach((a,ai)=>parts.slice(ai+1).forEach(b=>{const dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<120){ctx.strokeStyle=`rgba(255,255,255,${(1-d/120)*0.2})`;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}));}
+    function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);parts.forEach(p=>{p.move();p.draw();});link();requestAnimationFrame(animate);} initParts(); animate();
+  });
+  </script>
+</body>
+</html>
